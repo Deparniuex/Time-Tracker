@@ -25,6 +25,5 @@ func ConnectDB(cfg *PostgresConfig) (*sql.DB, error) {
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
 	return db, nil
 }

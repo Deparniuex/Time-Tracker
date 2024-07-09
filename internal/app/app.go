@@ -4,6 +4,7 @@ import (
 	storage "example.com/tracker/internal/storage/postgres"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -38,8 +39,19 @@ func (a *App) Run() error {
 	logrus.Info("Connection to DB success")
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
+		logrus.Fatal(err)
 		return err
 	}
-	m, err := migrate.NewWithDatabaseInstance("../../migrations", "postgres", driver)
+	migrator, err := migrate.NewWithDatabaseInstance("file://../migrations/", "postgres", driver)
+	if err != nil {
+		logrus.Fatal(err)
+		return err
+	}
+
+	err = migrator.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		logrus.Fatal(err)
+		return err
+	}
 	return nil
 }
