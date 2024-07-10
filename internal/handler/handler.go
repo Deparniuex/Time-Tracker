@@ -1,18 +1,15 @@
 package handler
 
 import (
-	"time"
-
 	"example.com/tracker/internal/service"
 )
 
-type HandlerConfig struct {
-	Port    string
-	Host    string
-	Timeout time.Duration
+type Handler struct {
+	Service service.Service
 }
 
-type Handler struct {
-	Config  HandlerConfig
-	Service service.Service
+func New(srvc service.Service) *Handler {
+	return &Handler{
+		Service: srvc,
+	}
 }

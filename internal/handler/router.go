@@ -7,6 +7,6 @@ func (h *Handler) InitRouter() *gin.Engine {
 
 	user := router.Group("/user")
 
-	user.GET("/")
+	user.GET("/", h.getUsers)
 	return router
 }
