@@ -6,6 +6,7 @@ import (
 
 	"example.com/tracker/internal/handler"
 	"example.com/tracker/internal/httpserver"
+	"example.com/tracker/internal/repository/api"
 	"example.com/tracker/internal/repository/pgrepo"
 	"example.com/tracker/internal/service"
 	storage "example.com/tracker/internal/storage/postgres"
@@ -61,11 +62,15 @@ func (a *App) Run() error {
 		return err
 	}
 	repository := pgrepo.New(db)
-	services := service.New(repository)
+	externalAPI := api.New(api.ApiClientConfig{
+		APIURL: viper.GetString("EXTERNAL_API_URL"),
+	})
+	services := service.New(repository, externalAPI)
 	handler := handler.New(services)
 	server := httpserver.NewServer(handler.InitRouter(), &httpserver.ServerConfig{
 		Port: viper.GetString("API_PORT"),
 	})
+
 	server.Start()
 	logrus.Info("Server started")
 	interrupt := make(chan os.Signal, 1)

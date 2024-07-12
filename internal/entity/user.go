@@ -1,11 +1,11 @@
 package entity
 
 type User struct {
-	ID             int
-	PassportSerie  int
-	PassportNumber int
-	First_name     string
-	Surname        string
-	Patronymic     string
-	Address        string
+	ID             int64  `json:"id"`
+	PassportSerie  int    `json:"passport_serie"`
+	PassportNumber int    `json:"passport_number"`
+	First_name     string `json:"name"`
+	Surname        string `json:"surname"`
+	Patronymic     string `json:"patronymic"`
+	Address        string `json:"address"`
 }
