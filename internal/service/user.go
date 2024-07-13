@@ -1,9 +1,8 @@
 package service
 
 import (
-	"context"
-
 	"example.com/tracker/internal/entity"
+	"example.com/tracker/pkg/util"
 )
 
 func (m *Manager) CreateUser(user *entity.User) error {
@@ -14,12 +13,12 @@ func (m *Manager) CreateUser(user *entity.User) error {
 	return m.Repository.CreateUser(user)
 }
 
-func (m *Manager) GetUsers(ctx context.Context) ([]*entity.User, error) {
-	return m.Repository.GetUsers(ctx)
+func (m *Manager) GetUsers(pagination *util.Pagination, filters map[string]string) ([]*entity.User, *util.Metadata, error) {
+	return m.Repository.GetUsers(pagination, filters)
 }
 
-func (m *Manager) DeleteUser(ctx context.Context, userID int64) error {
-	return m.Repository.DeleteUser(ctx, userID)
+func (m *Manager) DeleteUser(userID int64) error {
+	return m.Repository.DeleteUser(userID)
 }
 
 func (m *Manager) UpdateUser(user *entity.User) error {

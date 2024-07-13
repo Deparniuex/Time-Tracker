@@ -1,15 +1,14 @@
 package repository
 
 import (
-	"context"
-
 	"example.com/tracker/internal/entity"
+	"example.com/tracker/pkg/util"
 )
 
 type Repository interface {
 	CreateUser(user *entity.User) error
-	GetUsers(ctx context.Context) ([]*entity.User, error)
-	DeleteUser(ctx context.Context, userID int64) error
+	GetUsers(pagination *util.Pagination, filters map[string]string) ([]*entity.User, *util.Metadata, error)
+	DeleteUser(userID int64) error
 	UpdateUser(user *entity.User) error
 }
 

@@ -1,16 +1,20 @@
 package api
 
-import "example.com/tracker/internal/entity"
+import (
+	"example.com/tracker/internal/entity"
+	"example.com/tracker/pkg/util"
+)
 
 type CreateUserRequest struct {
 	PassportNumber string `json:"passportNumber" binding:"required"`
 }
 
 type GetUsersRequest struct {
-	Name       string `json:"name" binding:"omitempty"`
-	Surname    string `json:"surname" binding:"omitempty"`
-	Patronymic string `json:"patronymic" binding:"omitempty"`
-	Address    string `json:"address" binding:"omitempty"`
+	Pagination
+	Name       string `form:"name" binding:"omitempty"`
+	Surname    string `form:"surname" binding:"omitempty"`
+	Patronymic string `form:"patronymic" binding:"omitempty"`
+	Address    string `form:"address" binding:"omitempty"`
 }
 
 type UpdateUserRequest struct {
@@ -27,4 +31,5 @@ type GetUsersResponse struct {
 	Code    int            `json:"code"`
 	Message string         `json:"message"`
 	Body    []*entity.User `json:"body"`
+	Meta    util.Metadata  `json:"meta"`
 }

@@ -1,11 +1,12 @@
 package pgrepo
 
 import (
-	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"example.com/tracker/internal/entity"
+	"example.com/tracker/pkg/util"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,12 +32,33 @@ func (p *Postgres) CreateUser(user *entity.User) error {
 	return nil
 }
 
-func (p *Postgres) GetUsers(ctx context.Context) ([]*entity.User, error) {
+func (p *Postgres) GetUsers(pagination *util.Pagination, filters map[string]string) ([]*entity.User, *util.Metadata, error) {
 	query := fmt.Sprintf(`SELECT * FROM %s`, usersTable)
-	rows, err := p.DB.Query(query)
+
+	var conditions []string
+	var args []interface{}
+
+	paramIndex := 1
+
+	for field, value := range filters {
+		if value != "" {
+			conditions = append(conditions, fmt.Sprintf(`%s ILIKE $%d`, field, paramIndex))
+			args = append(args, value)
+			paramIndex++
+		}
+	}
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+
+	}
+	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", paramIndex, paramIndex+1)
+	args = append(args, pagination.PageSize, pagination.Offset())
+
+	logrus.Info(query, filters, args)
+	rows, err := p.DB.Query(query, args...)
 	if err != nil {
 		logrus.Error(err)
-		return nil, err
+		return nil, nil, err
 	}
 	defer rows.Close()
 	var users []*entity.User
@@ -54,9 +76,15 @@ func (p *Postgres) GetUsers(ctx context.Context) ([]*entity.User, error) {
 	}
 	if err := rows.Err(); err != nil {
 		logrus.Error(err)
-		return nil, err
+		return nil, nil, err
 	}
-	return users, err
+
+	totalRecords, err := p.countRecords(conditions, args)
+	if err != nil {
+		return nil, nil, err
+	}
+	metadata := pagination.CalculateMetadata(totalRecords)
+	return users, &metadata, nil
 }
 
 func (p *Postgres) UpdateUser(user *entity.User) error {
@@ -84,7 +112,7 @@ func (p *Postgres) UpdateUser(user *entity.User) error {
 	return nil
 }
 
-func (p *Postgres) DeleteUser(ctx context.Context, userID int64) error {
+func (p *Postgres) DeleteUser(userID int64) error {
 	query := fmt.Sprintf(
 		`DELETE FROM %s
 		 WHERE
@@ -99,4 +127,18 @@ func (p *Postgres) DeleteUser(ctx context.Context, userID int64) error {
 		return ErrRecordNotFound
 	}
 	return nil
+}
+
+func (p *Postgres) countRecords(conditions []string, args []interface{}) (int, error) {
+	countQuery := "SELECT COUNT(*) FROM users"
+	if len(conditions) > 0 {
+		countQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	var totalItems int
+	err := p.DB.QueryRow(countQuery, args[:len(args)-2]...).Scan(&totalItems)
+	if err != nil {
+		return 0, err
+	}
+	return totalItems, nil
 }

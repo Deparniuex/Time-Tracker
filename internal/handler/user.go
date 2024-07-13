@@ -52,7 +52,7 @@ func (h *Handler) createUser(ctx *gin.Context) {
 
 func (h *Handler) getUsers(ctx *gin.Context) {
 	var req api.GetUsersRequest
-	if err := ctx.ShouldBindQuery(req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		logrus.Error(err)
 		ctx.JSON(http.StatusBadRequest, &api.ErrorResponse{
 			Code:    http.StatusBadRequest,
@@ -60,7 +60,14 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 		})
 		return
 	}
-	users, err := h.Service.GetUsers(ctx)
+	logrus.Info(req.Name, req.Surname, req.Patronymic, req.Address)
+	filters := map[string]string{
+		"first_name": req.Name,
+		"surname":    req.Surname,
+		"patronymic": req.Patronymic,
+		"address":    req.Address,
+	}
+	users, metadata, err := h.Service.GetUsers(util.New(req.Page, req.PageSize), filters)
 
 	if err != nil {
 		logrus.Error(err)
@@ -75,6 +82,7 @@ func (h *Handler) getUsers(ctx *gin.Context) {
 		Code:    http.StatusOK,
 		Message: "ok",
 		Body:    users,
+		Meta:    *metadata,
 	})
 }
 
@@ -135,7 +143,7 @@ func (h *Handler) deleteUser(ctx *gin.Context) {
 		return
 	}
 	logrus.WithField("userID", id).Info("Received ID")
-	err = h.Service.DeleteUser(ctx, id.Value)
+	err = h.Service.DeleteUser(id.Value)
 
 	if err != nil {
 		logrus.Error(err)
