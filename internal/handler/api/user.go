@@ -6,25 +6,24 @@ import (
 )
 
 type CreateUserRequest struct {
-	PassportNumber string `json:"passportNumber" binding:"required"`
+	PassportNumber string `json:"passportNumber" binding:"required" example:"1234 567890"`
 }
 
 type GetUsersRequest struct {
 	Pagination
-	Name       string `form:"name" binding:"omitempty"`
-	Surname    string `form:"surname" binding:"omitempty"`
-	Patronymic string `form:"patronymic" binding:"omitempty"`
-	Address    string `form:"address" binding:"omitempty"`
+	Name       string `form:"name" binding:"omitempty" example:"Ivan"`
+	Surname    string `form:"surname" binding:"omitempty" example:"Ivanov"`
+	Patronymic string `form:"patronymic" binding:"omitempty" example:"Ivanovich"`
+	Address    string `form:"address" binding:"omitempty" example:"Nizhny Novgorod, Gorky Street 6"`
 }
 
 type UpdateUserRequest struct {
-	ID
-	Name           string `json:"name" binding:"omitempty"`
-	Surname        string `json:"surname" binding:"omitempty"`
-	Patronymic     string `json:"patronymic" binding:"omitempty"`
-	Address        string `json:"address" binding:"omitempty"`
-	PassportSerie  int    `json:"passport_serie" binding:"omitempty"`
-	PassportNumber int    `json:"passport_number" binding:"omitempty"`
+	Name           string `json:"name" binding:"required" example:"Ivan"`
+	Surname        string `json:"surname" binding:"required" example:"Ivanov"`
+	Patronymic     string `json:"patronymic" binding:"required" example:"Ivanovich"`
+	Address        string `json:"address" binding:"required" example:"Nizhny Novgorod, Gorky Street 6"`
+	PassportSerie  int    `json:"passport_serie" binding:"required" example:"1234"`
+	PassportNumber int    `json:"passport_number" binding:"required" example:"567890"`
 }
 
 type GetUsersResponse struct {

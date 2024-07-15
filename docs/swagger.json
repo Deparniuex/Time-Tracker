@@ -1,0 +1,561 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API Server for Time Tracker",
+        "title": "Time Tracker",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "paths": {
+        "/tasks/end/{id}": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "End timer for task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task timer succesfully ended",
+                        "schema": {
+                            "$ref": "#/definitions/api.DefaultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/start/{id}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Start timer for task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.TaskStartRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task timer started succesfully",
+                        "schema": {
+                            "$ref": "#/definitions/api.DefaultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/workload/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Get labor costs by userID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "2024-06-16T23:00:00Z",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "2024-04-16T23:00:00Z",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.WorkLoadsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get users using pagination",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "Nizhny Novgorod, Gorky Street 6",
+                        "name": "address",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Ivan",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 50,
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Ivanovich",
+                        "name": "patronymic",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "Ivanov",
+                        "name": "surname",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.GetUsersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create new user",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User succesfully created",
+                        "schema": {
+                            "$ref": "#/definitions/api.DefaultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/delete/{id}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete user by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.DefaultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/update/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user by id.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User succesfully updated",
+                        "schema": {
+                            "$ref": "#/definitions/api.DefaultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "passportNumber"
+            ],
+            "properties": {
+                "passportNumber": {
+                    "type": "string",
+                    "example": "1234 567890"
+                }
+            }
+        },
+        "api.DefaultResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.GetUsersResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.User"
+                    }
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/util.Metadata"
+                }
+            }
+        },
+        "api.TaskStartRequest": {
+            "type": "object",
+            "required": [
+                "task_description",
+                "task_name"
+            ],
+            "properties": {
+                "task_description": {
+                    "type": "string",
+                    "example": "Write an API Server for Effective Mobile"
+                },
+                "task_ends": {
+                    "type": "string",
+                    "default": "2024-07-16T23:00:00Z"
+                },
+                "task_name": {
+                    "type": "string",
+                    "default": "Time-Tracker API",
+                    "example": "Time-Tracker API"
+                }
+            }
+        },
+        "api.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "name",
+                "passport_number",
+                "passport_serie",
+                "patronymic",
+                "surname"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "Nizhny Novgorod, Gorky Street 6"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Ivan"
+                },
+                "passport_number": {
+                    "type": "integer",
+                    "example": 567890
+                },
+                "passport_serie": {
+                    "type": "integer",
+                    "example": 1234
+                },
+                "patronymic": {
+                    "type": "string",
+                    "example": "Ivanovich"
+                },
+                "surname": {
+                    "type": "string",
+                    "example": "Ivanov"
+                }
+            }
+        },
+        "api.WorkLoadsResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.WorkLoad"
+                    }
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.User": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "passport_number": {
+                    "type": "integer"
+                },
+                "passport_serie": {
+                    "type": "integer"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.WorkLoad": {
+            "type": "object",
+            "properties": {
+                "taskID": {
+                    "type": "integer"
+                },
+                "taskName": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "util.Metadata": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "first_page": {
+                    "type": "integer"
+                },
+                "last_page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "totalRecords": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

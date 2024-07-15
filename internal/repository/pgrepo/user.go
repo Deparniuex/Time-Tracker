@@ -26,9 +26,11 @@ func (p *Postgres) CreateUser(user *entity.User) error {
 	err := p.DB.QueryRow(query, user.Surname, user.First_name,
 		user.Patronymic, user.Address,
 		user.PassportSerie, user.PassportNumber).Scan(&user.ID)
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -47,20 +49,22 @@ func (p *Postgres) GetUsers(pagination *util.Pagination, filters map[string]stri
 			paramIndex++
 		}
 	}
+
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 
 	}
+
 	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", paramIndex, paramIndex+1)
 	args = append(args, pagination.PageSize, pagination.Offset())
-
-	logrus.Info(query, filters, args)
 	rows, err := p.DB.Query(query, args...)
+
 	if err != nil {
 		logrus.Error(err)
 		return nil, nil, err
 	}
 	defer rows.Close()
+
 	var users []*entity.User
 	for rows.Next() {
 		var user entity.User
@@ -74,15 +78,18 @@ func (p *Postgres) GetUsers(pagination *util.Pagination, filters map[string]stri
 		)
 		users = append(users, &user)
 	}
+
 	if err := rows.Err(); err != nil {
 		logrus.Error(err)
 		return nil, nil, err
 	}
 
 	totalRecords, err := p.countRecords(conditions, args)
+
 	if err != nil {
 		return nil, nil, err
 	}
+
 	metadata := pagination.CalculateMetadata(totalRecords)
 	return users, &metadata, nil
 }
@@ -101,14 +108,17 @@ func (p *Postgres) UpdateUser(user *entity.User) error {
 	`, usersTable)
 
 	tag, err := p.DB.Exec(query, user.Surname, user.First_name, user.Patronymic, user.Address, user.PassportSerie, user.PassportNumber, user.ID)
+
 	if err != nil {
-		logrus.Error(err)
 		return err
 	}
+
 	rowsSum, _ := tag.RowsAffected()
+
 	if rowsSum == 0 {
 		return errors.New("user doesn't exist")
 	}
+
 	return nil
 }
 
@@ -118,27 +128,33 @@ func (p *Postgres) DeleteUser(userID int64) error {
 		 WHERE
 		 	id = $1`, usersTable)
 	tag, err := p.DB.Exec(query, userID)
+
 	if err != nil {
 		logrus.Error(err)
 		return err
 	}
+
 	rowsSum, _ := tag.RowsAffected()
 	if rowsSum == 0 {
 		return ErrRecordNotFound
 	}
+
 	return nil
 }
 
 func (p *Postgres) countRecords(conditions []string, args []interface{}) (int, error) {
 	countQuery := "SELECT COUNT(*) FROM users"
+
 	if len(conditions) > 0 {
 		countQuery += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
 	var totalItems int
 	err := p.DB.QueryRow(countQuery, args[:len(args)-2]...).Scan(&totalItems)
+
 	if err != nil {
 		return 0, err
 	}
+
 	return totalItems, nil
 }

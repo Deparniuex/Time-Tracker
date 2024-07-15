@@ -17,23 +17,21 @@ import (
 	"github.com/spf13/viper"
 )
 
-type App struct {
-	//
-}
-
-func NewApp() *App {
-	return &App{
-		//
-	}
-}
-
-func (a *App) SetupConfig(path string) error {
+func SetupConfig(path string) error {
 	viper.SetConfigFile(path)
-
 	return viper.ReadInConfig()
 }
 
-func (a *App) Run() error {
+func SetupLogger() error {
+	level, err := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
+	if err != nil {
+		return err
+	}
+	logrus.SetLevel(level)
+	return nil
+}
+
+func Run() error {
 	db, err := storage.ConnectDB(&storage.PostgresConfig{
 		Host:     viper.GetString("DB_ADDRESS"),
 		Port:     viper.GetInt("DB_PORT"),
@@ -44,27 +42,30 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
-	logrus.Info("Connection to DB success")
+
+	logrus.Info("connection to DB success")
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		logrus.Fatal(err)
 		return err
 	}
+
 	//running from cmd
 	migrator, err := migrate.NewWithDatabaseInstance("file://../migrations/", "postgres", driver)
 	if err != nil {
-		logrus.Fatal(err)
 		return err
 	}
+
 	err = migrator.Up()
+	logrus.Infof("migrations status: %s", err)
 	if err != nil && err != migrate.ErrNoChange {
-		logrus.Fatal(err)
 		return err
 	}
+
 	repository := pgrepo.New(db)
 	externalAPI := api.New(api.ApiClientConfig{
 		APIURL: viper.GetString("EXTERNAL_API_URL"),
 	})
+
 	services := service.New(repository, externalAPI)
 	handler := handler.New(services)
 	server := httpserver.NewServer(handler.InitRouter(), &httpserver.ServerConfig{
@@ -72,7 +73,8 @@ func (a *App) Run() error {
 	})
 
 	server.Start()
-	logrus.Info("Server started")
+	logrus.Info("server started")
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 

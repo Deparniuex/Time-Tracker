@@ -15,6 +15,7 @@ var (
 
 const (
 	usersTable = "users"
+	tasksTable = "tasks"
 )
 
 func New(db *sql.DB) *Postgres {

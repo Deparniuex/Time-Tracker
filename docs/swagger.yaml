@@ -1,0 +1,372 @@
+definitions:
+  api.CreateUserRequest:
+    properties:
+      passportNumber:
+        example: 1234 567890
+        type: string
+    required:
+    - passportNumber
+    type: object
+  api.DefaultResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  api.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  api.GetUsersResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/entity.User'
+        type: array
+      code:
+        type: integer
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/util.Metadata'
+    type: object
+  api.TaskStartRequest:
+    properties:
+      task_description:
+        example: Write an API Server for Effective Mobile
+        type: string
+      task_ends:
+        default: "2024-07-16T23:00:00Z"
+        type: string
+      task_name:
+        default: Time-Tracker API
+        example: Time-Tracker API
+        type: string
+    required:
+    - task_description
+    - task_name
+    type: object
+  api.UpdateUserRequest:
+    properties:
+      address:
+        example: Nizhny Novgorod, Gorky Street 6
+        type: string
+      name:
+        example: Ivan
+        type: string
+      passport_number:
+        example: 567890
+        type: integer
+      passport_serie:
+        example: 1234
+        type: integer
+      patronymic:
+        example: Ivanovich
+        type: string
+      surname:
+        example: Ivanov
+        type: string
+    required:
+    - address
+    - name
+    - passport_number
+    - passport_serie
+    - patronymic
+    - surname
+    type: object
+  api.WorkLoadsResponse:
+    properties:
+      body:
+        items:
+          $ref: '#/definitions/entity.WorkLoad'
+        type: array
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  entity.User:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      passport_number:
+        type: integer
+      passport_serie:
+        type: integer
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  entity.WorkLoad:
+    properties:
+      taskID:
+        type: integer
+      taskName:
+        type: string
+      total:
+        type: number
+    type: object
+  util.Metadata:
+    properties:
+      current_page:
+        type: integer
+      first_page:
+        type: integer
+      last_page:
+        type: integer
+      page_size:
+        type: integer
+      totalRecords:
+        type: integer
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API Server for Time Tracker
+  title: Time Tracker
+  version: "1.0"
+paths:
+  /tasks/end/{id}:
+    post:
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task timer succesfully ended
+          schema:
+            $ref: '#/definitions/api.DefaultResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: End timer for task
+      tags:
+      - Tasks
+  /tasks/start/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/api.TaskStartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task timer started succesfully
+          schema:
+            $ref: '#/definitions/api.DefaultResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Start timer for task
+      tags:
+      - Tasks
+  /tasks/workload/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: "2024-06-16T23:00:00Z"
+        in: query
+        name: end_date
+        required: true
+        type: string
+      - default: "2024-04-16T23:00:00Z"
+        in: query
+        name: start_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.WorkLoadsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get labor costs by userID
+      tags:
+      - Tasks
+  /users/:
+    get:
+      parameters:
+      - example: Nizhny Novgorod, Gorky Street 6
+        in: query
+        name: address
+        type: string
+      - example: Ivan
+        in: query
+        name: name
+        type: string
+      - default: 1
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        in: query
+        maximum: 100
+        minimum: 1
+        name: page_size
+        type: integer
+      - example: Ivanovich
+        in: query
+        name: patronymic
+        type: string
+      - example: Ivanov
+        in: query
+        name: surname
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GetUsersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get users using pagination
+      tags:
+      - Users
+  /users/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User succesfully created
+          schema:
+            $ref: '#/definitions/api.DefaultResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create new user
+      tags:
+      - Users
+  /users/delete/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DefaultResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Delete user by ID
+      tags:
+      - Users
+  /users/update/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User succesfully updated
+          schema:
+            $ref: '#/definitions/api.DefaultResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Update user by id.
+      tags:
+      - Users
+swagger: "2.0"

@@ -3,9 +3,11 @@ package service
 import (
 	"example.com/tracker/internal/entity"
 	"example.com/tracker/pkg/util"
+	"github.com/sirupsen/logrus"
 )
 
 func (m *Manager) CreateUser(user *entity.User) error {
+	logrus.Debugf("getting user info from external API")
 	user, err := m.ExternalApi.GetUsersInfo(user)
 	if err != nil {
 		return err
