@@ -1,10 +1,12 @@
 package httpserver
 
 import (
+	"net"
 	"net/http"
 )
 
 type ServerConfig struct {
+	Host string
 	Port string
 }
 
@@ -16,7 +18,7 @@ type Server struct {
 func NewServer(handler http.Handler, cfg *ServerConfig) *Server {
 	httpServer := &http.Server{
 		Handler: handler,
-		Addr:    cfg.Port,
+		Addr:    net.JoinHostPort(cfg.Host, cfg.Port),
 	}
 	return &Server{
 		server: httpServer,
