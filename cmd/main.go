@@ -12,7 +12,7 @@ import (
 // @host localhost:3000
 // BasePath /
 func main() {
-	err := app.SetupConfig("../config/.env")
+	err := app.SetupConfig("config/.env")
 	if err != nil {
 		logrus.Fatal(err)
 	}

@@ -50,7 +50,7 @@ func Run() error {
 	}
 
 	//running from cmd
-	migrator, err := migrate.NewWithDatabaseInstance("file://../migrations/", "postgres", driver)
+	migrator, err := migrate.NewWithDatabaseInstance("file://migrations/", "postgres", driver)
 	if err != nil {
 		return err
 	}
